@@ -1,2 +1,2 @@
 # my-react
-a some simple functionality that explain react 🤤️💜️
+a some simple functionality that explain react 🤩️💜️
