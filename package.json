@@ -1,0 +1,18 @@
+{
+  "name": "my-react",
+  "version": "1.0.0",
+  "description": "a some simple functionality that explain react 🤩️💜️",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@syaw0.github.com:Syaw0/my-react.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.9.3"
+  }
+}
