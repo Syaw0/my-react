@@ -14,10 +14,10 @@ interface Fiber {
 
 
 let nextUnitWork:Fiber|null = null
-
+let fiberRoot:Fiber|null = null
 const render = (element:ReactElement|ReactTextElement , dom:HTMLElement) => {
 
-  nextUnitWork = {
+  fiberRoot = {
     dom,
     type:"",
     props:{
@@ -27,7 +27,7 @@ const render = (element:ReactElement|ReactTextElement , dom:HTMLElement) => {
     child:null,
     sibling:null
   }
-
+  nextUnitWork = fiberRoot
   requestIdleCallback(workLoop)
 
 }
@@ -39,9 +39,32 @@ const workLoop = (deadline:IdleDeadline) => {
     nextUnitWork = performUnitOfWork(nextUnitWork)
     shouldYield = deadline.timeRemaining() < 1
   }
+  if(!nextUnitWork && fiberRoot){
+    // all units of work are finished.
+    commitRoot()
+    return 
+  }
   requestIdleCallback(workLoop)
 }
 
+const commitRoot = () => {
+  if(fiberRoot && fiberRoot.child){
+    commitWork(fiberRoot.child)
+  }
+  fiberRoot = null
+}
+
+const commitWork = (fiber:null|Fiber) => {
+  if(!fiber){
+    return
+  }
+  const domParent = fiber.parent?.dom
+  domParent?.appendChild(fiber.dom as HTMLElement)
+  // recursively call commitWork with fibers...
+  commitWork(fiber.sibling)
+  commitWork(fiber.child)
+
+}
 
 const performUnitOfWork = (fiber:Fiber):Fiber|null => {
   //  add dom
@@ -50,14 +73,6 @@ const performUnitOfWork = (fiber:Fiber):Fiber|null => {
     fiber.dom = createDom(fiber)
   }
 
-
-  // adding dom to parent dom
-  // ! we must don't do this because we are adding dom scilly
-  // TODO create a functionality that add all doms in one call
-
-  if(fiber.parent){
-    fiber.parent.dom?.appendChild(fiber.dom)
-  }
 
   //  create new Fiber
 
