@@ -218,14 +218,7 @@ const createDom = (fiber: Fiber): HTMLElement => {
       ? document.createTextNode("")
       : document.createElement(fiber.type);
 
-  const isProperty = (key: string) => key !== "children";
-
-  Object.keys(fiber.props)
-    .filter(isProperty)
-    .forEach((prop) => {
-      dom[prop] = fiber.props[prop];
-    });
-
+  updateDom(dom , {} , fiber.props)
   return dom;
 };
 
