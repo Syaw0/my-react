@@ -151,58 +151,34 @@ const reconcileChildren = (
   fiber: Fiber,
   elements: (ReactElement | ReactTextElement)[]
 ) => {
-  let oldFiber: Fiber | null = fiber.alternate && fiber.alternate.child;
+  let oldFiber:any = fiber.alternate && fiber.alternate.child;
   let prevSibling: Fiber | null = null;
-  elements.forEach((el, index) => {
-    let newFiber: Fiber | null = null;
-    if (oldFiber) {
-      const sameType = oldFiber && el && oldFiber.type === el.type;
+  let index = 0
 
-      if (sameType) {
-        // just update props
-        newFiber = {
-          type: oldFiber.type,
-          props: el.props,
-          alternate: oldFiber,
-          parent: fiber,
-          child: null,
-          sibling: null,
-          dom: oldFiber.dom,
-          effectTag: "UPDATE",
-        };
-      }
 
-      if (el && !sameType) {
-        // adding new node
-        newFiber = {
-          type: el.type,
-          props: el.props,
-          alternate: null,
-          parent: fiber,
-          child: null,
-          sibling: null,
-          dom: null,
-          effectTag: "PLACEMENT",
-        };
-      }
+  while(
+    oldFiber!= null ||
+    index < elements.length
+  ){
+    const el = elements[index]
+    const sameType = oldFiber && el && oldFiber.type === el.type;
+    let newFiber:Fiber|null =null
+    if (sameType) {
+      // just update props
+      newFiber = {
+        type: oldFiber.type,
+        props: el.props,
+        alternate: oldFiber,
+        parent: fiber,
+        child: null,
+        sibling: null,
+        dom: oldFiber.dom,
+        effectTag: "UPDATE",
+      };
+    }
 
-      if (oldFiber && !sameType) {
-        oldFiber.effectTag = "DELETION";
-        deletion.push(oldFiber);
-      }
-
-      oldFiber = oldFiber.sibling;
-
-      if (index === 0) {
-        fiber.child = newFiber;
-      } else {
-        if (prevSibling) {
-          prevSibling.sibling = newFiber;
-        }
-      }
-      prevSibling = newFiber;
-    } else {
-      // first render
+    if (el && !sameType) {
+      // adding new node
       newFiber = {
         type: el.type,
         props: el.props,
@@ -211,19 +187,29 @@ const reconcileChildren = (
         child: null,
         sibling: null,
         dom: null,
+        effectTag: "PLACEMENT",
       };
-      newFiber.alternate = newFiber;
-
-      if (index === 0) {
-        fiber.child = newFiber;
-      } else {
-        if (prevSibling) {
-          prevSibling.sibling = newFiber;
-        }
-      }
-      prevSibling = newFiber;
     }
-  });
+
+    if (oldFiber && !sameType) {
+      oldFiber.effectTag = "DELETION";
+      deletion.push(oldFiber);
+    }
+
+    if(oldFiber){
+      oldFiber = oldFiber.sibling;
+    }
+
+    if (index === 0) {
+      fiber.child = newFiber;
+    } else {
+      if (prevSibling) {
+        prevSibling.sibling = newFiber;
+      }
+    }
+    prevSibling = newFiber;
+    index++
+  }
 };
 
 const createDom = (fiber: Fiber): HTMLElement => {
